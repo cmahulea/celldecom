@@ -7,8 +7,8 @@ dest_no = 5;
 rob_no = 4;
 simul_no = 100;
 rob_size = 1; %square robot rob_size x rob_size
-
-
+save_data = '/home/cosmos/cmahulea/matlab_condor/celldecom/data';
+%save_data = '.\\data\\';
 env_OK = 0;
 while ~env_OK
     env_OK = 1;
@@ -30,14 +30,14 @@ number_of_markings = min(number_of_markings,min(dest_no,length(PN.potential_mf))
 PN = generate_random_problems(PN,simul_no,number_of_markings); %generate random problems 
 
 fprintf(1,'\nStart refining using rectangular cell decomposition...');
-PNpr = refine_problems_rectangular(PN,'.\\data\\problemRect%d.xml');
+PNpr = refine_problems_rectangular(PN,sprintf('%sproblemRect%%d.xml',save_data));
 fprintf(1,'\nFinished refining.');
 fprintf(1,'\n');
 
 %save environment_3;
 %load environment_3;
 
-Graphs = reduceGraphs(PNpr,'.\\data\\problemGraph%d.xml');
+Graphs = reduceGraphs(PNpr,sprintf('%sproblemGraph%%d.xml',save_data));
 
 %PN1 = generate_random_problems(PN1,simul_no,number_of_markings); %generate random problems for rectangular cell decomposition
 fprintf(1,'\nStart refining using triangular cell decomposition...');
