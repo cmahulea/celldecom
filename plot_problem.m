@@ -1,8 +1,9 @@
 function plot_problem(PN,prob)
 
+
 figure;hold on;
-C = PN.Q;
-centr = PN.centroids;
+C = PN.problems{prob}.Q;
+centr = PN.problems{prob}.centroids;
 for i=1:length(C)
     fill(C{i}(1,:),C{i}(2,:),'w','EdgeColor',[.8 .8 .8],'FaceAlpha',0.5);
     text(centr{i}(1),centr{i}(2),sprintf('p_{%d}',i),'HorizontalAlignment','center','Color','k','FontSize',10,'FontAngle','italic','FontName','TimesNewRoman');
@@ -22,16 +23,16 @@ end
 for i = 1 : length(PN.problems{prob}.traj)
     traj = PN.problems{prob}.traj{i};
     for j = 1 : length(traj)-1
-        cent1 = PN.centroids{traj(j)};
-        cent2 = PN.centroids{traj(j+1)};
+        cent1 = PN.problems{prob}.centroids{traj(j)};
+        cent2 = PN.problems{prob}.centroids{traj(j+1)};
         line([cent1(1) cent2(1)],[cent1(2) cent2(2)],'Color','green','LineWidth',2);
     end
 end
 
-objects = PN.obstacles;
+objects = PN.problems{prob}.obstacles;
 for i = 1 : length(objects)
     %    plot(objects{i},'FaceColor','black');
-    plot(polyshape(objects{i}.vertices'),'FaceColor','black','FaceAlpha',0.5);
+    plot(polyshape(objects{i}'),'FaceColor','black','FaceAlpha',0.5);
 end
 xlim([0 PN.limits(1)]);
 ylim([0 PN.limits(2)]);

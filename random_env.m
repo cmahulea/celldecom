@@ -25,10 +25,8 @@
 % ============================================================================
 
 % Function to create Random Enviroment
-function objects = random_env(obs_no,obs_size)
-limits = axis;
-hold on
-grid on
+function objects = random_env(xmax,ymax,obs_no,obs_size)
+limits = [0 xmax 0 ymax];
 
 center=zeros(2,obs_no);
 objects=cell(1,obs_no);
@@ -63,103 +61,12 @@ for i=1:obs_no
         objects{i}(:,j)=[px;py];
     end
     
-    %creating convex obstacles & drawing them
-    k=convhull(objects{i}(1,:),objects{i}(2,:));
-    objects{i}=polyshape(objects{i}(:,k(1:length(k)-1))');
-    plot(objects{i},'FaceColor','black');
 end
 
+for i = 1 : length(objects)
+    k = convhull(objects{i}');
+    objects{i}=objects{i}(:,k(1:length(k)-1));
+end
 return
-
-
-%% Initial and final points
-
-for k=1:rob_no %Initial points
-    not=1;
-    while not>=1
-        not=0;
-        sx=abs(limits(1)+(limits(2)-limits(1))*rand(1)-rob_size);
-        sy=(limits(3)+(limits(4)-limits(3))*rand(1))/10; %initial points in the 10% on bottom part of the environment
-        initial_point{k}=rob_size*round([sx,sy]/rob_size);
-        initial_polyshape{k} = polyshape([initial_point{k}(1) initial_point{k}(1)+rob_size ...
-            initial_point{k}(1)+rob_size,initial_point{k}(1)],[initial_point{k}(2) initial_point{k}(2) ...
-            initial_point{k}(2)+rob_size initial_point{k}(2)+rob_size]);
-        %Objetos
-        for o=1:length(objects)
-            if (area(intersect(objects{o},initial_polyshape{k}))>1000*eps)
-                not=not+1;
-            end  
-        end   
-        
-        %Puntos iniciales
-        if k>1
-            for t=1:(k-1)
-                if (area(intersect(initial_polyshape{t},initial_polyshape{k}))>1000*eps)
-                    not=not+1;
-                end      
-            end
-        end 
-        
-    end
-end
-
-for k=1:dest_no %Final points
-    not=1;
-    while not>=1
-        not=0;
-        dx=abs(limits(1)+(limits(2)-limits(1))*rand(1)-rob_size);
-        dy=limits(4)/2-rob_size+(limits(4)/2-limits(3))*rand(1);
-        final_point{k}=rob_size*round([dx,dy]/rob_size);
-        final_polyshape{k} = polyshape([final_point{k}(1) final_point{k}(1)+rob_size ...
-            final_point{k}(1)+rob_size,final_point{k}(1)],[final_point{k}(2) final_point{k}(2) ...
-            final_point{k}(2)+rob_size final_point{k}(2)+rob_size]);
-
-
-        %Objetos
-        for o=1:length(objects)
-            if area(intersect(objects{o},final_polyshape{k}))>1000*eps
-                not=not+1;
-            end
-        end   
-
-
-        %Puntos iniciales
-        for t=1:length(initial_point)
-            if area(intersect(initial_polyshape{t},final_polyshape{k}))>1000*eps
-                not=not+1;
-            end
-        end
-        
-        %Puntos finales
-        if k>1
-            for t=1:(k-1)
-                if area(intersect(final_polyshape{t},final_polyshape{k}))>1000*eps
-                    not=not+1;
-                end
-            end
-        end
-        
-    end  
-end
-   
-
-%% Plotting points
-
-for i=1:length(initial_point)   
-    plot(initial_polyshape{i},'FaceColor','red');
-%    text((initial_point{i}(1)+0.2),(initial_point{i}(2)+0.2),{num2str(i)});
-    hold on;
-end
-
-pause(0.1)
-for i=1:length(final_point)
-    plot(final_polyshape{i},'FaceColor','green');
-    hold on;
-end
-pause(0.1)
-
-end
-
-
 
 

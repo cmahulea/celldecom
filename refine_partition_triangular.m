@@ -1,0 +1,47 @@
+function newpart = refine_partition_triangular(PN)
+
+
+regions_in_trajectories = [];
+trajs = PN.traj;
+for j = 1 : length(trajs)
+    regions_in_trajectories = [regions_in_trajectories trajs{j}];
+end
+regions_in_trajectories = unique(regions_in_trajectories,'sorted');
+points = [];
+for j = length(regions_in_trajectories): -1 : 1 %fora each region on a trajectory partition it again
+    triangle = PN.Q{regions_in_trajectories(j)};
+    if (area(polyshape(triangle(1,:),triangle(2,:))) >= 1) %partion
+        cont = 1;
+        for k = 1 : length(PN.centroids)
+            if (k  ~= regions_in_trajectories(j))
+                if (norm(PN.centroids{k} - PN.centroids{regions_in_trajectories(j)}) < 1) %if teh distance to the other centroids is greater than 1
+                    cont = 0;
+                    break;
+                end
+            end
+        end
+        if cont == 0
+            regions_in_trajectories(j) = [];
+        else
+            points = [points; PN.centroids{regions_in_trajectories(j)}];
+        end
+    else
+        regions_in_trajectories(j) = [];
+    end
+end
+[C,adj,new_obstacles] = triangular_decomposition(PN.obstacles,[0, PN.limits(1), 0, PN.limits(2)],points,PN.Q);
+
+centroids = cell(1,length(C));
+for i=1:length(C)
+    centroids{i} = mean(C{i},2)';
+end
+
+newpart = construct_PN(C,adj,PN.limits(2));
+newpart.Q = C;
+newpart.adj = adj;
+newpart.centroids = centroids;
+newpart.obstacles = new_obstacles;
+newpart.limits = PN.limits;
+newpart.no_refined_cells = length(regions_in_trajectories);
+fprintf(1,'\nRefined cells %s',mat2str(regions_in_trajectories));
+return

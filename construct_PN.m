@@ -2,7 +2,7 @@ function PN = construct_PN(C,adj,ymax)
 
 %compute the Petri net model
 nplaces=length(C); %number of places
-ntrans = sum(sum(full(adj))); %number of transitions
+ntrans = sum(sum(full(adj))) - nplaces; %number of transitions
 Pre = sparse(nplaces,ntrans);
 Post = sparse(nplaces,ntrans);
 %construct matrices Pre and Post

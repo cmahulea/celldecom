@@ -1,0 +1,69 @@
+function Graphs = reduceGraphs(PNpr,filename)
+
+max_l = length(PNpr);
+for i = 1 : max_l
+    fprintf(1,'\nCompute graph %d out of %d.',i,max_l);
+    Graphs{i}.states = {};
+    Graphs{i}.centroid = {};
+    Graphs{i}.C = {};
+    if isfield(PNpr{i},'fuse')
+        fused_states = cell2mat(PNpr{i}.fuse);
+    else
+        fused_states = [];
+    end
+    for j = 1 : length(PNpr{i}.Q)
+        if ~any(fused_states(:) == j) %this state is not fused
+            Graphs{i}.states{end+1} = j;
+            Graphs{i}.centroid{end+1} = PNpr{i}.centroids{j};
+            Graphs{i}.C{end+1} = PNpr{i}.Q{j};
+        else
+            for ll = 1 : length(PNpr{i}.fuse)
+                if any(PNpr{i}.fuse{ll}(:) == j)
+                    regions = PNpr{i}.fuse{ll};
+                    Graphs{i}.states{end+1} = regions;
+
+                    pol = polyshape();
+                    for k = 1 : length(regions)
+                        pol = union(pol,polyshape(PNpr{i}.Q{regions(k)}'));
+                    end
+                    Graphs{i}.C{end+1} = pol.Vertices';
+
+
+                    Graphs{i}.centroid{end+1} = PNpr{i}.fuse_centroid{ll};
+                    PNpr{i}.fuse{ll} = [];
+                end
+            end
+        end
+    end
+    %create the adjancency matrix
+    Graphs{i}.adj = sparse(length(Graphs{i}.states),length(Graphs{i}.states));
+    for j = 1 : length(Graphs{i}.states)
+        original_states = Graphs{i}.states{j};
+        adjancency_original = [];
+        for k = 1 : length(original_states)
+            adjancency_original = [adjancency_original find(PNpr{i}.adj(original_states(k),:))];
+        end
+        adjancency_original = setdiff(adjancency_original,original_states);
+        adjancency_original = unique(adjancency_original,'sorted');
+        for k = 1 : length(adjancency_original)
+            original_region = adjancency_original(k);
+            for ll = 1 : length(Graphs{i}.states)
+                if any(Graphs{i}.states{ll} == original_region)
+                    Graphs{i}.adj(j,ll) = 1;
+                    Graphs{i}.adj(ll,j) = 1;
+                    break;
+                end
+            end
+        end
+    end
+    Graphs{i}.initial_points = PNpr{i}.initial_points;
+    Graphs{i}.final_points = PNpr{i}.final_points;
+    Graphs{i}.obstacles = PNpr{i}.obstacles;
+    Graphs{i}.limits = PNpr{i}.limits;
+    Graphs{i}.index = PNpr{i}.index;
+    Graphs{i}.refined = PNpr{i}.indices_refined;
+
+    write_data_graph(sprintf(filename,Graphs{i}.index),Graphs{i});
+
+end
+fprintf(1,'\n');

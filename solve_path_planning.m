@@ -6,11 +6,17 @@ function [problems,flag] = solve_path_planning(PN,m0,mf)
 flag = 1;
 [nplaces,ntrans] = size(PN.Post);
 f = [ones(1,ntrans) 1000];
+for i = 1 : ntrans %the cost of the transition is the distance between centroids
+    f(i) = norm(PN.centroids{find(PN.Pre(:,i))} - PN.centroids{find(PN.Post(:,i))});
+end
 Aeq = [PN.C zeros(nplaces,1)];
 beq = mf - m0;
 A = [PN.Post -ones(nplaces,1)];
 b = -m0;%zeros(nplaces,1);
-
+problems = PN;
+if isfield(problems,'problems')
+    problems = rmfield(problems, 'problems');
+end
 options = optimset('linprog');
 options.Display = 'off';
 tic;
@@ -24,7 +30,7 @@ if (EXITFLAG > 0)
     problems.time_solving_LP = time_to_solve;
     if (problems.congestion > 1) %solve a new LP since the first one could return a non-integer solution
         fprintf(1,'\nSolved a new LP (path planning) since the previous one could be not integer');
-        f = ones(1,ntrans);
+        f(end) = [];
         Aeq = PN.C;
         beq = mf - m0;
         A = PN.Post;
