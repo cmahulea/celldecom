@@ -12,7 +12,9 @@ problem.Post = eval(S.Post);
 problem.C = eval(S.C);
 problem.m0 = eval(S.m0);
 problem.mf = eval(S.mf);
-problem.sigma = S.sigma;
+problem.sigma = eval(S.sigma);
+problem.initial_points = eval(S.initial_points);
+problem.final_points = eval(S.final_points);
 problem.traj={};
 cont = 1;ind=1;
 while cont

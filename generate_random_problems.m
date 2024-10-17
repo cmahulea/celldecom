@@ -66,6 +66,8 @@ for k = 1 : simul_no
             PN.problems{k}.Euclidean = Euclidean_distance / length(Rob_places);
         else
             fprintf(1,'\nNot possible to get the trajectories!');
+            save("problem.mat","PN.problems{k}");
+            error('Simulation stop');
         end
     else
         fprintf(1,'\nOptimziation problems for path planning infeasable');

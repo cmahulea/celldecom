@@ -1,4 +1,4 @@
-function Graphs = reduceGraphs(PNpr,filename)
+function [Graphs,dataset] = reduceGraphs(PNpr,filename)
 
 max_l = length(PNpr);
 for i = 1 : max_l
@@ -63,7 +63,74 @@ for i = 1 : max_l
     Graphs{i}.index = PNpr{i}.index;
     Graphs{i}.refined = PNpr{i}.indices_refined;
 
-    write_data_graph(sprintf(filename,Graphs{i}.index),Graphs{i});
+    write_data_graph(sprintf('%sproblemGraph%d.xml',filename,Graphs{i}.index),Graphs{i});
 
+    dataset(i).index = Graphs{i}.index;
+    dataset(i).refined = Graphs{i}.refined;
+    %create the environment. Eacjh element is equal with the cell nmber to
+    %which belong or 0 if it is an obstacle
+    dataset(i).environment=zeros(32,32);
+    for j = 0 : 31
+        for k = 0 : 31
+            for ll = 1 : length(Graphs{i}.C)
+                % Extraer las coordenadas mínimas y máximas en x e y de la
+                % celda ll
+                x_min_grande = min(Graphs{i}.C{ll}(1,:));
+                x_max_grande = max(Graphs{i}.C{ll}(1,:));
+                y_min_grande = min(Graphs{i}.C{ll}(2,:));
+                y_max_grande = max(Graphs{i}.C{ll}(2,:));
+                % Calcular las coordenadas de los vértices del cuadrado más pequeño
+                vertices_pequeno = [
+                    j, k;                     % Vértice inferior izquierdo
+                    j+1, k;         % Vértice inferior derecho
+                    j+1, k+1; % Vértice superior derecho
+                    j, k+1          % Vértice superior izquierdo
+                    ];
+                % Comprobar si todos los vértices del cuadrado pequeño están dentro del cuadrado grande
+                if all(vertices_pequeno(:, 1) >= x_min_grande) && all(vertices_pequeno(:, 1) <= x_max_grande) && ...
+                        all(vertices_pequeno(:, 2) >= y_min_grande) && all(vertices_pequeno(:, 2) <= y_max_grande)
+                    dataset(i).environment(j+1,k+1) = ll;
+                    break;
+                end
+            end
+        end
+    end
+    dataset(i).start = zeros(5,2);
+    for j = 1 : size(Graphs{i}.initial_points,1)
+        robot = Graphs{i}.initial_points(j,:);
+        dataset(i).start(j,1) = ceil(robot(1));
+        dataset(i).start(j,2) = ceil(robot(2));
+    end
+    dataset(i).end = zeros(5,2);
+    for j = 1 : size(Graphs{i}.final_points,1)
+        robot = Graphs{i}.final_points(j,:);
+        dataset(i).end(j,1) = ceil(robot(1));
+        dataset(i).end(j,2) = ceil(robot(2));
+    end
+    dataset(i).num_cells = length(Graphs{i}.C);
+    dataset(i).distance = 0;
+    dataset(i).congestion = PNpr{i}.congestion;
+
+    trajectories = PNpr{i}.traj;  % Obtener las trayectorias del conjunto actual
+    numTrajectories = length(trajectories);  % Número de trayectorias
+    traject = cell(1, numTrajectories);  % Preasignar una celda para almacenar las trayectorias
+
+    for j = 1:numTrajectories
+        traj = trajectories{j};  % Obtener la trayectoria actual
+        numPoints = length(traj);  % Número de puntos en la trayectoria
+        currentTraject = zeros(numPoints , 2);  % Preasignar espacio para la trayectoria
+
+        % Colocar los centroides del resto de la trayectoria (excepto el último punto)
+        for k = 1:numPoints
+            currentTraject(k, :) = PNpr{i}.centroids{traj(k)};
+            if (k > 1)
+                dataset(i).distance = dataset(i).distance + norm(currentTraject(k-1,:)-currentTraject(k,:));
+            end
+        end
+        % Guardar la trayectoria completa en la celda
+        traject{j} = currentTraject;
+    end
+
+    dataset(i).traj = traject;
 end
 fprintf(1,'\n');

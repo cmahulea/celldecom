@@ -1,17 +1,12 @@
 function PNnew = refine_problems_rectangular(PN,filename)
 
-
-
 %start refining until no more possible
 still_refining = 1;
 PNnew={};
 refined_problems = length(PN.problems);
-%for i = 1 : length(PN.obstacles)
-%    polys{i} = polyshape(PN.obstacles{i}');
-%end
+
 while (still_refining == 1)
     still_refining = 0;
-    %for i = 1 : length(PN.problems)
     while ~isempty(PN.problems)
         if (PN.problems{1}.should_refine == 1)
             still_refining = 1;
@@ -19,12 +14,9 @@ while (still_refining == 1)
             refined_problems = refined_problems + 1;
             fprintf(1,'\n Problem %d.',refined_problems);
             newPart = refine_partition_second(PN.problems{1});
-            PN.problems{1}.should_refine = 0; %do not refining again
+            PN.problems{1}.should_refine = 0; %do not refine again
             if (newPart.no_refined_cells == 0)
-                fprintf(1,'\nThe refined problem is not new! Skip it');
-                fprintf(1,'\n==================================================');
-                fprintf(1,'\n==================================================');
-                fprintf(1,'\n==================================================');
+                fprintf(1,'\nThe refined problem is not new! Skip it\n==================================================');
                 refined_problems = refined_problems - 1;
                 continue;
             end
@@ -103,52 +95,12 @@ while (still_refining == 1)
                     for j = 1 : length(adjacent_reg_possible)
                         pol1 = polyshape( PN.problems{1}.Q{adjacent_reg_possible(j)}');
                         pol = union(pol1 , pol2);
-                        %res = subtract(convhull(pol),pol);
-                        % possible_point = mean(pol.Vertices)';
-                        % if ((pol.NumRegions == 1) && (pol.NumHoles == 0))
-                        %     temp = [];
-                        %     for k = 1 : length(PN.problems{1}.fuse{end})
-                        %         temp = [temp find(PN.problems{1}.adj(PN.problems{1}.fuse{end}(k),:))];
-                        %     end
-                        %     temp = unique([temp find(PN.problems{1}.adj(adjacent_reg_possible(j),:))],'sorted');
-                        %     temp = setdiff(temp,[PN.problems{1}.fuse{end} adjacent_reg_possible(j)]);                           
-                        %     intersect_obstacle = 0;
-                        %     for k = 1 : length(temp)
-                        %         centr = mean(PN.problems{1}.Q{temp(k)},2);
-                        %         for ll = 1 : length(polys)
-                        %             in = intersect(polys{ll},[possible_point' ; centr']);
-                        %             if ~isempty(in)
-                        %                 intersect_obstacle = 1;
-                        %                 break;
-                        %             end
-                        %         end
-                        %         if (intersect_obstacle == 1)
-                        %             break;
-                        %         end
-                        %     end
-                        %     if (intersect_obstacle == 0) 
-                        %         PN.problems{1}.fuse{end} = [PN.problems{1}.fuse{end} adjacent_reg_possible(j)];
-                        %         pol2 = union(pol2, polyshape(PN.problems{1}.Q{adjacent_reg_possible(j)}'));
-                        %         PN.problems{1}.fuse_centroid{end} = mean(pol2.Vertices)';
-                        %         add_more = 1;
-                        %     end
-                        % 
-                        % end
                         if isempty(subtract(convhull(pol),pol).Vertices) %if the diference of the convex hull with the union of regions is empty then the union is convex
                             PN.problems{1}.fuse{end} = [PN.problems{1}.fuse{end} adjacent_reg_possible(j)];
                             pol2 = union(pol2, polyshape(PN.problems{1}.Q{adjacent_reg_possible(j)}'));
                             PN.problems{1}.fuse_centroid{end} = mean(pol2.Vertices)';
                             add_more = 1;
                         end
-
-                        % if ((pol.NumRegions == 1) && (pol.NumHoles == 0))
-                        %     new_centroid = mean(pol.Vertices);
-                        %     if isinterior(pol,new_centroid(1),new_centroid(2))
-                        %         PN.problems{1}.fuse{end} = [PN.problems{1}.fuse{end} adjacent_reg_possible(j)];
-                        %         pol2 = union(pol2, polyshape(PN.problems{1}.Q{adjacent_reg_possible(j)}'));
-                        %         add_more = 1;
-                        %     end
-                        % end
                     end
                 end
                 potential_merging_regions = setdiff(potential_merging_regions,PN.problems{1}.fuse{end});
@@ -161,7 +113,7 @@ while (still_refining == 1)
             end
             
             
-            write_data(sprintf(filename,PN.problems{1}.index),PN.problems{1});
+            write_data(sprintf('%sproblemRect%d.xml',filename,PN.problems{1}.index),PN.problems{1});
             PNnew{end+1} = PN.problems{1};
             PN.problems(1)=[];
 
@@ -207,7 +159,7 @@ while (still_refining == 1)
             end
             %%%%%%%%%%%%%%%
         else
-            write_data(sprintf(filename,PN.problems{1}.index),PN.problems{1}); %the problem should not be refined
+            write_data(sprintf('%sproblemRect%d.xml',filename,PN.problems{1}.index),PN.problems{1}); %the problem should not be refined
             PNnew{end+1} = PN.problems{1};
             PN.problems(1)=[];            
         end

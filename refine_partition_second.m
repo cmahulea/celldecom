@@ -5,6 +5,7 @@ function newPart = refine_partition_second(PN)
     newPart.centroids = PN.centroids;
     newPart.obstacles = PN.obstacles;
     newPart.limits = PN.limits;
+    newPart.no_refined_cells = 0;
     regions_in_trajectories = [];
     trajs = PN.traj;
     for j = 1 : length(trajs)

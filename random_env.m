@@ -27,11 +27,8 @@
 % Function to create Random Enviroment
 function objects = random_env(xmax,ymax,obs_no,obs_size)
 limits = [0 xmax 0 ymax];
-
 center=zeros(2,obs_no);
 objects=cell(1,obs_no);
-
-%% Obstacles
 
 for i=1:obs_no 
     ax=limits(1)+obs_size;
@@ -42,19 +39,12 @@ for i=1:obs_no
     cy=ay+(by-ay)*rand(1);
     center(:,i)=[cx;cy];
     
-    pts=2+randi(20);
+    pts=2+randi(8);
     apx=cx-obs_size;
     bpx=cx+obs_size;
     apy=cy-obs_size;
     bpy=cy+obs_size;
     
-    apxb=apx-limits;
-    bpxb=bpx+limits;
-    apyb=apy-limits;
-    bpyb=bpy+limits;
-    
- %   objects_bound{i}=[apxb bpxb bpxb apxb; apyb apyb bpyb bpyb];
-
     for j=1:pts
         px=apx+(bpx-apx)*rand(1);
         py=apy+(bpy-apy)*rand(1);

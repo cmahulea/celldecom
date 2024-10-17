@@ -28,7 +28,7 @@ if (EXITFLAG > 0)
     fprintf(1,'and get b=%f',bound);
     problems.congestion = ceil(bound); %for each cell, number of crossing time
     problems.time_solving_LP = time_to_solve;
-    if (problems.congestion > 1) %solve a new LP since the first one could return a non-integer solution
+    if (norm(problems.congestion - bound) > 2.2204e-10) %solve a new LP since the first one could return a non-integer solution
         fprintf(1,'\nSolved a new LP (path planning) since the previous one could be not integer');
         f(end) = [];
         Aeq = PN.C;
@@ -43,12 +43,13 @@ if (EXITFLAG > 0)
         time_to_solve2 = toc;
         problems.time_solving_LP2 = time_to_solve2;
     end
-    problems.sigma = X(1:ntrans);
+    problems.sigma = round(X(1:ntrans));
     problems.cell_length = sum(problems.sigma)/sum(m0);
 else
     flag = 0;
     problems.error=1;
-    fprintf(1,'and no Solution found!')
+    fprintf(1,'and no Solution found!');
+    error('Optimization problem cannot find a solution.');
     return;
 end
 return

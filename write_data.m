@@ -10,6 +10,8 @@ struct_to_write.C = mat2str(problem.C);
 struct_to_write.m0 = mat2str(problem.m0);
 struct_to_write.mf = mat2str(problem.mf);
 struct_to_write.sigma = mat2str(problem.sigma);
+struct_to_write.initial_points = mat2str(problem.initial_points);
+struct_to_write.final_points = mat2str(problem.final_points);
 for i = 1 : length(problem.traj)
     struct_to_write = setfield(struct_to_write,sprintf('T%d',i),mat2str(problem.traj{i}));
 end
